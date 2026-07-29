@@ -48,3 +48,39 @@ Built with a modern full-stack architecture, the application features a clean, r
 ```bash
 git clone https://github.com/catelizn/task_execution_time_predictor.git
 cd task_execution_time_predictor
+
+2. Install dependencies:
+```bash
+npm install
+
+3. Create .env file:
+```env
+DATABASE_URL="postgresql://postgres:mysecretpassword@localhost:5432/postgres"
+
+4. Start PostgreSQL with Docker:
+```bash
+docker run --name postgres-dev -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 -d postgres:15
+
+5. Run migrations:
+```bash
+npx prisma migrate deploy
+
+6. Start development server:
+```bash
+npm run dev
+
+Open http://localhost:3000
+
+### Installation
+- OpenAI integration for smarter predictions
+
+- User authentication
+
+- Task history and audit logs
+
+- Advanced analytics dashboard
+
+### License
+MIT
+
+### Built by cateLIZN
