@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📊 Task Execution Time Predictor
 
-## Getting Started
+Full-stack application for managing projects and tasks with AI-powered time estimation.
 
-First, run the development server:
+[![Live Demo](https://img.shields.io/badge/Live_Demo-View_Project-2ea44f?style=for-the-badge&logo=render)](https://tetp-task-execution-time-predictor.onrender.com)
+[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.2-000000?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma)](https://www.prisma.io/)
 
+---
+
+## Overview
+
+Task Execution Time Predictor is a production-ready project management tool designed to help teams estimate task completion time. By combining a robust task management system with intelligent heuristics, it provides developers and project managers with a clear, data-driven view of their workflow.
+
+Built with a modern full-stack architecture, the application features a clean, responsive interface and a scalable REST API. It serves as a foundation for integrating AI models (like OpenAI) to deliver even more accurate time predictions.
+
+## Key Features
+
+- Project & Task Management — Create, organize, and track projects and tasks.
+- Intelligent Time Estimation — Custom heuristic algorithm predicts task completion time based on description complexity.
+- Full CRUD Operations — Complete Create, Read, Update, and Delete functionality.
+- Modern Tech Stack — Next.js 16, TypeScript, Prisma, PostgreSQL.
+
+## Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS |
+| Database | PostgreSQL |
+| ORM | Prisma |
+| Deployment | Render |
+
+## Quick Start
+
+### Prerequisites
+
+- Node.js (v18 or later)
+- Docker (for PostgreSQL)
+- Git
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+git clone https://github.com/catelizn/task_execution_time_predictor.git
+cd task_execution_time_predictor
