@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSocket } from '@/lib/useSocket'
 
 type Project = {
   id: string
@@ -30,6 +31,7 @@ function formatDate(dateStr: string): string {
 }
 
 export default function Home() {
+  const socket = useSocket()
   const [projects, setProjects] = useState<Project[]>([])
   const [tasks, setTasks] = useState<Task[]>([])
   const [projectName, setProjectName] = useState('')
@@ -40,69 +42,196 @@ export default function Home() {
   const [taskDeadline, setTaskDeadline] = useState('')
   const [taskAssignee, setTaskAssignee] = useState('')
   const [loading, setLoading] = useState(false)
+  const [predicting, setPredicting] = useState(false)
+  const [predictedTime, setPredictedTime] = useState<number | null>(null)
+  const [user, setUser] = useState<any>(null)
+
+  useEffect(() => {
+    fetch('/api/session', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.user) {
+          setUser(data.user)
+        } else {
+          window.location.href = '/login'
+        }
+      })
+      .catch(() => {
+        window.location.href = '/login'
+      })
+  }, [])
 
   const fetchProjects = async () => {
-    const res = await fetch('/api/projects')
+    const res = await fetch('/api/projects', { credentials: 'include' })
     const data = await res.json()
     setProjects(data)
   }
 
   const fetchTasks = async () => {
-    const res = await fetch('/api/tasks')
+    const res = await fetch('/api/tasks', { credentials: 'include' })
     const data = await res.json()
     setTasks(data)
   }
 
   useEffect(() => {
-    fetchProjects()
-    fetchTasks()
-  }, [])
+    if (user) {
+      fetchProjects()
+      fetchTasks()
+    }
+  }, [user])
+
+  useEffect(() => {
+    if (!socket) return
+
+    socket.on('task-created', () => {
+      fetchTasks()
+    })
+
+    socket.on('task-deleted', () => {
+      fetchTasks()
+    })
+
+    return () => {
+      socket.off('task-created')
+      socket.off('task-deleted')
+    }
+  }, [socket])
 
   const handleProjectSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    await fetch('/api/projects', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: projectName, description: projectDesc }),
-    })
-    setProjectName('')
-    setProjectDesc('')
-    await fetchProjects()
-    setLoading(false)
+    try {
+      const res = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ name: projectName, description: projectDesc }),
+      })
+      if (!res.ok) {
+        const error = await res.text()
+        console.error('Project creation error:', res.status, error)
+        alert('Failed to create project')
+        return
+      }
+      const data = await res.json()
+      console.log('Project created:', data)
+      setProjectName('')
+      setProjectDesc('')
+      await fetchProjects()
+    } catch (error) {
+      console.error('Project creation error:', error)
+      alert('Failed to create project')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleTaskSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    await fetch('/api/tasks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: taskTitle,
-        description: taskDesc,
-        projectId: taskProjectId,
-        deadline: taskDeadline || null,
-        assignee: taskAssignee || null,
-      }),
-    })
-    setTaskTitle('')
-    setTaskDesc('')
-    setTaskProjectId('')
-    setTaskDeadline('')
-    setTaskAssignee('')
-    await fetchTasks()
-    setLoading(false)
+    try {
+      const res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          title: taskTitle,
+          description: taskDesc,
+          projectId: taskProjectId,
+          deadline: taskDeadline || null,
+          assignee: taskAssignee || null,
+        }),
+      })
+      if (!res.ok) {
+        const error = await res.text()
+        console.error('Task creation error:', res.status, error)
+        alert('Failed to create task')
+        return
+      }
+      const data = await res.json()
+      setTaskTitle('')
+      setTaskDesc('')
+      setTaskProjectId('')
+      setTaskDeadline('')
+      setTaskAssignee('')
+      setPredictedTime(null)
+      await fetchTasks()
+      if (socket) {
+        socket.emit('task-created', data)
+      }
+    } catch (error) {
+      console.error('Task creation error:', error)
+      alert('Failed to create task')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const predictTime = async () => {
+    if (!taskDesc) {
+      alert('Please enter task description first')
+      return
+    }
+    setPredicting(true)
+    try {
+      const res = await fetch('/api/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ description: taskDesc }),
+      })
+      const data = await res.json()
+      if (data.time) {
+        setPredictedTime(data.time)
+        alert(`Estimated time: ${data.time} hours`)
+      } else {
+        alert('Prediction failed: ' + (data.error || 'Unknown error'))
+      }
+    } catch (error) {
+      alert('Prediction error: ' + String(error))
+    } finally {
+      setPredicting(false)
+    }
   }
 
   const deleteTask = async (id: string) => {
-    await fetch(`/api/tasks/${id}`, { method: 'DELETE' })
-    await fetchTasks()
+    try {
+      await fetch(`/api/tasks/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+      await fetchTasks()
+      if (socket) {
+        socket.emit('task-deleted', { id })
+      }
+    } catch (error) {
+      console.error('Delete error:', error)
+    }
+  }
+
+  const logout = async () => {
+    await fetch('/api/logout', { method: 'POST', credentials: 'include' })
+    window.location.href = '/login'
+  }
+
+  if (!user) {
+    return <div className="p-6 text-center">Loading...</div>
   }
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Project & Task Management</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Project & Task Management</h1>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-600">Hello, {user.name || user.email}</span>
+          <button
+            onClick={logout}
+            className="text-sm text-red-600 hover:underline"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
 
       <div className="grid grid-cols-2 gap-6">
         <div>
@@ -175,6 +304,21 @@ export default function Home() {
               onChange={(e) => setTaskAssignee(e.target.value)}
               className="w-full border rounded px-3 py-2"
             />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={predictTime}
+                disabled={predicting || !taskDesc}
+                className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 disabled:opacity-50"
+              >
+                {predicting ? 'Predicting...' : 'Predict time'}
+              </button>
+              {predictedTime !== null && (
+                <span className="text-sm text-gray-600 self-center">
+                  Estimate: {predictedTime}h
+                </span>
+              )}
+            </div>
             <button
               type="submit"
               disabled={loading}

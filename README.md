@@ -1,6 +1,4 @@
-# 📊 Task Execution Time Predictor
-
-**Full-stack application for managing projects and tasks with AI‑powered time estimation.**
+# Task Execution Time Predictor
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-View_Project-2ea44f?style=for-the-badge&logo=render)](https://tetp-task-execution-time-predictor.onrender.com)
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
@@ -10,96 +8,128 @@
 
 ---
 
-## Overview
+## What it does
 
-**Task Execution Time Predictor** is a production‑ready project management tool that helps teams estimate task completion time using intelligent heuristics. It combines a clean task‑management interface with a scalable REST API, making it easy to track projects, assign tasks, and get data‑driven time predictions.
+This is a project management tool with one specific feature that most similar systems lack: **AI-powered time estimation for tasks**.
 
-Built with a modern full‑stack architecture, this application serves as a solid foundation for integrating advanced AI models (e.g., OpenAI) to deliver even more accurate forecasts.
+You create projects, add tasks, assign people, set deadlines — and then you can ask the system to guess how long a task might take based on its description. It's not magic, it's just a well-placed LLM call that helps teams plan sprints with less guessing.
 
----
-
-## Key Features
-
-- **Project & Task Management** – Create, organise, and track projects and tasks effortlessly.
-- **Intelligent Time Estimation** – A custom heuristic algorithm predicts completion time based on task description complexity.
-- **Full CRUD Operations** – Complete Create, Read, Update, and Delete functionality for all resources.
-- **Modern Tech Stack** – Built with Next.js 16, TypeScript, Prisma, PostgreSQL, and Tailwind CSS.
-- **Responsive UI** – Clean, user‑friendly interface that works on any device.
+**Main flows:**
+- Projects and tasks with assignees and deadlines
+- AI-based time prediction from task description
+- Real-time updates across all clients (WebSocket)
+- Clean UI without extra clutter
 
 ---
 
-## Tech Stack
+## Tech stack
 
-| Category     | Technology                     |
-|--------------|--------------------------------|
-| Framework    | Next.js 16 (App Router)        |
-| Language     | TypeScript                     |
-| Styling      | Tailwind CSS                   |
-| Database     | PostgreSQL                     |
-| ORM          | Prisma                         |
-| Deployment   | Render                         |
-
----
-
-## Quick Start
-
-### Prerequisites
-
-- Node.js (v18 or later)
-- Docker (to run PostgreSQL locally)
-- Git
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/catelizn/task_execution_time_predictor.git
-   cd task_execution_time_predictor
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Create `.env` file**
-   ```env
-   DATABASE_URL="postgresql://postgres:mysecretpassword@localhost:5432/postgres"
-   ```
-
-4. **Start PostgreSQL with Docker**
-   ```bash
-   docker run --name postgres-dev -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 -d postgres:15
-   ```
-
-5. **Run migrations**
-   ```bash
-   npx prisma migrate deploy
-   ```
-
-6. **Start development server**
-   ```bash
-   npm run dev
-   ```
-
-   Open [http://localhost:3000](http://localhost:3000)
+| Layer | Technology |
+|-------|------------|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS |
+| Database | PostgreSQL + Prisma |
+| Cache | Redis (optional) |
+| Real‑time | Socket.IO |
+| AI / LLM | Polza API (OpenAI‑compatible) |
+| Auth | JWT (http‑only cookies) |
+| Deployment | Render |
+| CI/CD | GitHub Actions |
+| Testing | Jest |
 
 ---
 
-## Roadmap
+## Architecture (short)
 
-- **OpenAI Integration** – Replace heuristics with real AI predictions.
-- **User Authentication** – Secure login and role‑based access.
-- **Task History** – Full audit log of changes.
-- **Advanced Analytics** – Detailed dashboards and exportable reports.
+- API routes are modular and testable.
+- JWT lives in http‑only cookies — no XSS worries.
+- WebSocket server (Socket.IO) runs separately from Next.js.
+- Migrations via Prisma — everything in code.
+- Docker Compose spins up the whole stack locally.
+
+---
+
+## Screenshots
+
+All screenshots are from the live demo.
+
+### Create project
+![Create project](./screenshots/create_project.png)
+
+### Create task with prediction
+![Create task](./screenshots/create_task.png)
+
+### Time prediction
+![Prediction](./screenshots/predict_time.png)
+
+### Task list
+![Tasks](./screenshots/new_tasks.png)
+
+---
+
+## Quick start
+
+```bash
+git clone https://github.com/catelizn/task_execution_time_predictor.git
+cd task_execution_time_predictor
+npm install
+
+# Create .env with your values
+cp .env.example .env  # or just create it manually
+
+# Start PostgreSQL and Redis via Docker
+docker run --name postgres-dev -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 -d postgres:15
+docker run --name redis-dev -p 6379:6379 -d redis:7
+
+# Run migrations
+npx prisma migrate deploy
+
+# Start Next.js and WebSocket together
+npm run dev:all
+```
+
+Open `http://localhost:3000` — you're good to go.
+
+---
+
+## Environment variables
+
+Minimal set:
+
+```
+DATABASE_URL=postgresql://...
+JWT_SECRET=...
+POLZA_API_KEY=sk-...
+POLZA_BASE_URL=...
+```
+
+---
+
+## Tests
+
+```bash
+npm test              # all tests
+npm run test:watch    # watch mode
+npm run test:coverage # coverage report
+```
+
+---
+
+## Deployment
+
+The project is deployed on **Render**. On push to `main`:
+- GitHub Actions runs tests
+- Render rebuilds and redeploys automatically
+
+For your own deployment, you'll need your own PostgreSQL instance (Supabase works fine) and the same environment variables.
 
 ---
 
 ## License
 
-Distributed under the MIT License.
+MIT
 
 ---
 
-**Built with by [catelizn](https://github.com/catelizn)**
-
+**Built by [catelizn](https://github.com/catelizn)** 

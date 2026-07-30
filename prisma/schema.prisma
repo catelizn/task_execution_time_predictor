@@ -7,10 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String?  // для email/пароль (опционально, если используем OAuth)
+  role      String   @default("user") // admin, manager, user
+  emailVerified DateTime? //
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  projects  Project[]
+  tasks     Task[]
+}
+
 model Project {
   id          String   @id @default(cuid())
   name        String
   description String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   tasks       Task[]
@@ -25,6 +40,8 @@ model Task {
   assignee    String?
   projectId   String
   project     Project  @relation(fields: [projectId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
