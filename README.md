@@ -89,7 +89,7 @@ npx prisma migrate deploy
 npm run dev:all
 ```
 
-Open `http://localhost:3000` — you're good to go.
+Open `http://localhost:3000` 
 
 ---
 
