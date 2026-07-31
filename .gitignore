@@ -48,3 +48,17 @@ next-env.d.ts
 .agents/
 .claude/
 .windsurf/
+.agents/
+.claude/
+.windsurf/
+AGENTS.md
+CLAUDE.md
+skills-lock.json
+middleware.disabled.ts
+.windsurf/
+.claude/
+.agents/
+AGENTS.md
+CLAUDE.md
+.cursor/
+.vscode/
